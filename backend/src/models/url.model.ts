@@ -2,7 +2,8 @@ import   { Schema,Document, model } from "mongoose";
 interface UrlDoc extends Document{
     fullUrl:string,
     shortUrl:string,
-    mappId:string
+    mappId:string,
+    clicks:number
 }
 const urlSchema=new Schema<UrlDoc>({
     fullUrl:{
@@ -19,6 +20,11 @@ const urlSchema=new Schema<UrlDoc>({
         type:String,
         required:true,
         unique:true
+    },
+    clicks:{
+        type:Number,
+        default:0
+
     }
 })
 

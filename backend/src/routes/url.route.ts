@@ -14,16 +14,17 @@ route.get('/:id',async(req:Request,res:Response)=>{
             })
         }
 
-        const urldoc=await UrlSchema.findOne({mappId:token_id});
-        console.log(urldoc,"............testing.....");
+        const urldoc=await UrlSchema.findOneAndUpdate({mappId:token_id},{"$inc":{"clicks": 1}},{new:true});
+       
        
         if(!urldoc){
             return res.status(400).json({
                 message:"Could not find this site"
             })
         }
-        res.redirect(urldoc.fullUrl)
-      
+        
+        return res.redirect(urldoc.fullUrl)
+     
        
        } catch (error) {
         console.log(error);
