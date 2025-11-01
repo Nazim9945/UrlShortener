@@ -16,6 +16,6 @@ app.use('/api',urlRoutes);
 const PORT=process.env.PORT || 9000
 
 
- dbconnect()
+dbconnect()
 app.listen(PORT,()=>
     console.log("Server is running at Port :",PORT))

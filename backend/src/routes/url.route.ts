@@ -36,15 +36,16 @@ route.post('/url',async(req:Request,res:Response)=>{
   try {
       const { url } = req.body;
         console.log(url,"...testing");
+
       const token_id = nanoid();
       const newdoc = new UrlSchema();
       newdoc.mappId = token_id;
       newdoc.fullUrl = url;
-      newdoc.shortUrl = "http://localhost:3000/" + token_id;
+      newdoc.shortUrl = "http://localhost:3000/api/" + token_id;
       await newdoc.save();
       console.log(newdoc);
       return res.status(200).json({
-        shorten_url: newdoc.shortUrl,
+        newdoc,
         message: "Done with shortning url",
       });
 
