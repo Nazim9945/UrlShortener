@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { motion } from "framer-motion";
 import axios from "axios";
+import toast from "react-hot-toast";
 
 const App: React.FC = () => {
   const [url, setUrl] = useState("https://www.youtube.com");
@@ -15,14 +16,10 @@ const App: React.FC = () => {
     setShortUrl(null);
 
     try {
-      // const res = await fetch("/api/shorten", {
-      //   method: "POST",
-      //   headers: { "Content-Type": "application/json" },
-      //   body: JSON.stringify({ fullUrl: url }),
-      // });
-      const res=await axios.post(`http://localhost:3000/api/create`,{url});
+      
+      const res=await axios.post(import.meta.env.VITE_BASE_URL as string,{url});
 
-      console.log(res);
+    
       if (!res.data) throw new Error("Failed to shorten URL");
 
       const {data}=res;
@@ -79,14 +76,38 @@ const App: React.FC = () => {
             className="mt-4 text-center"
           >
             <p className="text-gray-600">Your shortened URL:</p>
-            <a
-              href={shortUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-blue-600 font-medium hover:underline"
-            >
-              {shortUrl}
-            </a>
+            <div className="flex items-center gap-2 mt-2">
+              <input
+              type="text"
+              value={shortUrl}
+              readOnly
+              className="w-full border border-gray-300 rounded-xl px-4 py-2 bg-gray-50 text-blue-600"
+              />
+              <motion.button
+              whileTap={{ scale: 0.95 }}
+              onClick={() => {
+                navigator.clipboard.writeText(shortUrl);
+                const button = document.activeElement as HTMLElement;
+                const originalText = button.innerText;
+                button.innerText = "Copied!";
+                setTimeout(() => {
+                button.innerText = originalText;
+                }, 2000);
+                toast("Copied!", {
+                  duration: 2000,
+                  icon: "👏",
+                  style: {
+                    borderRadius: "10px",
+                    background: "#333",
+                    color: "#fff",
+                  },
+                });
+              }}
+              className="bg-green-600 text-white px-4 py-2 rounded-xl hover:bg-green-700 transition-all"
+              >
+              Copy
+              </motion.button>
+            </div>
           </motion.div>
         )}
       </motion.div>
