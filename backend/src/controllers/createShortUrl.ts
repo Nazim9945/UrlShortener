@@ -7,7 +7,6 @@ dotenv.config();
 const createShortUrl = TryCatch( async(req: Request, res: Response,next:NextFunction) => {
  
     const { url } = req.body;
-
     const token_id = generateid(8);
     
     const newdoc = new UrlSchema({
