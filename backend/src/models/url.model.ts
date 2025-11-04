@@ -8,7 +8,6 @@ const urlSchema=new Schema<UrlDoc>({
     fullUrl:{
         type:String,
         required:true,
-        unique:true
     },
     shortUrl:{
         type:String,

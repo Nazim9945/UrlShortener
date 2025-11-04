@@ -4,6 +4,7 @@ import cors from 'cors'
 import shortUrl from './routes/shortUrl.route'
 import redirectFromShortUrl from './controllers/redirectFromShortUrl'
 import { dbconnect } from './databases/dbconnect'
+import { globalErrorHandler } from './middlewares/errorHandler'
 
 dotenv.config()
 const PORT=process.env.PORT || 9000
@@ -16,7 +17,7 @@ app.use(cors({
 app.use('/api/create',shortUrl);
 app.get('/:id',redirectFromShortUrl)
 
-
+app.use(globalErrorHandler)
 
 app.listen(PORT,()=>
      dbconnect().then(()=>

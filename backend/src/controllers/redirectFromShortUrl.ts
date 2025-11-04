@@ -1,13 +1,13 @@
-import { Request, Response } from "express";
+import { NextFunction, Request, Response } from "express";
 import UrlSchema from "../models/url.model";
-const redirectFromShortUrl = async (req: Request, res: Response) => {
-  try {
+import { TryCatch } from "../utils/TryCatch";
+import { AppError } from "../middlewares/errorHandler";
+const redirectFromShortUrl = TryCatch( async (req: Request, res: Response,next:NextFunction) => {
+ 
     const token_id = req.params.id;
    
     if (!token_id) {
-      return res.status(400).json({
-        message: "Bad request, id is missing",
-      });
+      throw new AppError("Invalid URL", 400);
     }
 
     const urldoc = await UrlSchema.findOneAndUpdate(
@@ -17,14 +17,11 @@ const redirectFromShortUrl = async (req: Request, res: Response) => {
     );
 
     if (!urldoc) {
-      return res.status(400).json({
-        message: "Could not find this site",
-      });
+    throw new AppError("URL not found", 404);
     }
 
     res.redirect(urldoc.fullUrl);
-  } catch (error) {
-    console.log(error);
-  }
-};
+  
+} )
+
 export default redirectFromShortUrl;
