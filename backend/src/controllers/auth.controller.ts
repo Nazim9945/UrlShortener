@@ -7,6 +7,9 @@ dotenv.config()
 const registerUser=TryCatch(async(req,res)=>{
     const {name,email,password}=req.body;
     // Zod validation-->pending
+    if(!name || !email || !password){
+      return new AppError("Invalid Credential",401)
+    }
     const isExist=await UserSchema.findOne({email:email});
     if(isExist){
         throw new Error("this email is registered already");
@@ -59,4 +62,31 @@ const loginUser=TryCatch(async(req,res)=>{
     res.status(200).json({ token,message: "User logged in successfully" });
 }); 
 
-export {registerUser,loginUser}
+
+const meProfile=TryCatch(async(req,res)=>{
+  
+      // @ts-ignore
+      const userId=req.userId
+    
+        if(userId){
+            const user=await UserSchema.findOne({_id:userId}).select("-password")
+            
+            return res.status(200).json({
+              user
+            })
+        }
+        return res.status(200).json({
+          user:null,
+        });
+        
+  
+
+}) 
+const signout=TryCatch(async(req, res) => {
+  res.clearCookie("accessToken");
+  return res.status(200).json({
+    success: true,
+    message: "Logged out successfully",
+  });
+})
+export {registerUser,loginUser,meProfile,signout}

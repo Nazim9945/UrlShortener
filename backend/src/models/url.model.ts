@@ -1,5 +1,5 @@
 import mongoose,  { Schema,Document, model } from "mongoose";
-interface UrlDoc extends Document{
+export interface UrlDoc extends Document{
     fullUrl:string,
     shortUrl:string,
     clicks:number,

@@ -4,38 +4,40 @@ import UrlSchema from "../models/url.model";
 import { TryCatch } from "../utils/TryCatch";
 import dotenv from "dotenv";
 import { AppError } from "../middlewares/errorHandler";
+import { createWithoutUser } from "../services/createWithoutUser";
+import { createWithUser } from "../services/createWithUser";
 dotenv.config();
 const createShortUrl = TryCatch( async(req: Request, res: Response,next:NextFunction) => {
  
     const {url,slug} = req.body;
+    console.log(url,slug);
+    if(!url){
+      return res.status(401).json({
+        message:"No url"
+      })
+    }
     // @ts-ignore
     const userId=req.userId;
     const token_id =slug? slug : generateid(8);
     if(slug){
-      const checkSlug=await UrlSchema.findOne({ShortUrl:slug});
-      if(checkSlug) return new AppError("This custom url already exists",401)
+      const checkSlug=await UrlSchema.findOne({shortUrl:slug});
+     
+      if(checkSlug)  {
+       return  next(new AppError("This custom name already exist",409))
+      }
     }
-    
+    let newdoc;
     if(!userId){
-       const newdoc = new UrlSchema({
-         fullUrl: url,
-         shortUrl:slug ? slug: token_id,
-       });
-
-       await newdoc.save();
-
+     newdoc=await createWithoutUser(url,token_id)
+      
        
     }
     else{
-       const newdoc = new UrlSchema({
-         fullUrl: url,
-         shortUrl: slug ? slug : token_id,
-         user: userId,
-       });
-       await newdoc.save()
+     newdoc =await createWithUser(url, token_id,userId);
     }
+    console.log(newdoc)
     res.status(200).json({
-      shortUrl: (process.env.shortUrlDomain as string) + "/" + token_id,
+      newdoc
     });
     
   } )
