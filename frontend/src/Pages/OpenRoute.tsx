@@ -1,32 +1,19 @@
-import { useEffect, useState, type ReactNode } from "react";
-import { useAuth } from "../context/authContext";
+import {  type ReactNode } from "react";
+
 import { Navigate } from "react-router"; 
-import { axiosInstance } from "../helper/axiosInstance";
+
+import useCheckUser from "../hooks/useCheckUser";
+
 
 export const OpenRoute = ({ children }: { children: ReactNode }) => {
-  const { user, isAuth } = useAuth();
-  const [isLoading, setLoading] = useState(false);
 
-  const meProfile = async () => {
-    setLoading(true);
-    try {
-      const res = await axiosInstance.get("api/auth/me");
-      isAuth(res.data.user);
-    } catch (err) {
-      console.error(err);
-      isAuth(null);
-    } finally {
-      setLoading(false);
-    }
-  };
+  
 
-  useEffect(() => {
-    meProfile();
-  }, []);
+  const { isLoading,user } = useCheckUser();
 
   if (user) {
     return <Navigate to="/DashBoard" />;
   }
-
+  
   return <>{isLoading ? <div>Loading...</div> : children}</>;
 };

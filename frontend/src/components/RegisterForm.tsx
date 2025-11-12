@@ -1,58 +1,46 @@
-import React, { useState, type FormEvent } from "react";
-import { useNavigate, Link } from "react-router";
-import { axiosInstance } from "../helper/axiosInstance";
-import toast from "react-hot-toast";
+import  { useState, type ChangeEvent,type  FormEvent } from "react";
+import { Link } from "react-router";
+import useRegister from "../hooks/useRegister";
 
-export interface FormState {
+interface FormState {
   name: string;
   email: string;
   password: string;
 }
 
 export default function RegisterForm() {
-  const navigate = useNavigate();
-  const [form, setForm] = useState<FormState>({ name: "", email: "", password: "" });
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [showPassword, setShowPassword] = useState(false);
+  const [form, setForm] = useState<FormState>({
+    name: "",
+    email: "",
+    password: "",
+  });
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) =>
-    setForm((s) => ({ ...s, [e.target.name]: e.target.value }));
+  const [showPassword, setShowPassword] = useState(false);
+  const { handleRegister, error, loading } = useRegister();
+  const handleChange = (e: ChangeEvent<HTMLInputElement>) =>{
+    setForm({...form,[e.target.name]:e.target.value})
+  }
+  
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    setError(null);
-
-    const { name, email, password } = form;
-    if (!name.trim() || !email.trim() || !password.trim()) {
-      setError("Please fill out all fields.");
-      return;
-    }
-
-    setLoading(true);
-    try {
-      const res = await axiosInstance.post("/api/auth/register", { name, email, password });
-      if (res?.data) {
-        toast.success("Account created");
-        navigate("/DashBoard");
-      } else {
-        throw new Error("Unexpected server response");
-      }
-    } catch (err: any) {
-      const msg = err?.response?.data?.message || err?.message || "Registration failed";
-      setError(msg);
-      toast.error(msg);
-    } finally {
-      setLoading(false);
-    }
+    console.log(form)
+    await handleRegister(form);
   };
 
   return (
     <div className="w-full max-w-md mx-auto mt-12">
       <div className="bg-white shadow-lg rounded-2xl p-6">
-        <h2 className="text-2xl font-semibold text-center mb-4">Create your account</h2>
+        <h2 className="text-2xl font-semibold text-center mb-4">
+          Create your account
+        </h2>
 
-        <form onSubmit={handleSubmit} className="space-y-4" aria-live="polite" noValidate>
+        <form
+          onSubmit={handleSubmit}
+          className="space-y-4"
+          aria-live="polite"
+          noValidate
+        >
           <label className="block">
             <span className="text-sm font-medium text-gray-700">Full name</span>
             <input
@@ -81,7 +69,9 @@ export default function RegisterForm() {
 
           <label className="block">
             <div className="flex items-center justify-between">
-              <span className="text-sm font-medium text-gray-700">Password</span>
+              <span className="text-sm font-medium text-gray-700">
+                Password
+              </span>
               <button
                 type="button"
                 onClick={() => setShowPassword((s) => !s)}
@@ -107,7 +97,9 @@ export default function RegisterForm() {
             type="submit"
             disabled={loading}
             className={`w-full rounded-xl py-2 font-medium text-white transition ${
-              loading ? "bg-blue-300 cursor-wait" : "bg-blue-600 hover:bg-blue-700"
+              loading
+                ? "bg-blue-300 cursor-wait"
+                : "bg-blue-600 hover:bg-blue-700"
             }`}
           >
             {loading ? "Creating account..." : "Create account"}

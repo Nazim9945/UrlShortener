@@ -1,46 +1,21 @@
-import React, { useState, type FormEvent } from "react";
-import { useNavigate, Link } from "react-router";
-import { axiosInstance } from "../helper/axiosInstance";
-import toast from "react-hot-toast";
+import  { useState, type FormEvent } from "react";
+import useLogin from "../hooks/useLogin";
+import { Link } from "react-router";
 
-export interface LoginForm {
-  email: string;
-  password: string;
-}
 
-const LoginForm: React.FC = () => {
-  const navigate = useNavigate();
+
+
+const LoginForm= () => {
+ 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  
   const [showPassword, setShowPassword] = useState(false);
-
+  const{handleLogin,error,loading}=useLogin()
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    setError(null);
-
-    if (!email.trim() || !password.trim()) {
-      setError("Please enter both email and password.");
-      return;
-    }
-
-    setLoading(true);
-    try {
-      const res = await axiosInstance.post("/api/auth/login", { email, password });
-      if (res?.data) {
-        toast.success("Logged in successfully");
-        navigate("/DashBoard");
-      } else {
-        throw new Error("Invalid response from server");
-      }
-    } catch (err: any) {
-      const msg = err?.response?.data?.message || err?.message || "Login failed";
-      setError(msg);
-      toast.error(msg);
-    } finally {
-      setLoading(false);
-    }
+    await handleLogin(email,password);
+   
   };
 
   return (
