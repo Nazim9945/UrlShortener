@@ -1,30 +1,33 @@
-import { useEffect, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { axiosInstance } from "../helper/axiosInstance";
 import type { ShortUrl } from "../Pages/DashBoardPage";
 
-
-
-const useGetAllUrls=()=>{
-     const [urls, setUrls] = useState<ShortUrl[]>([]);
-      const [loadingUrls, setLoadingUrls] = useState(false);
-     const getAllUrls = async () => {
-        setLoadingUrls(true);
-        try {
-          const res = await axiosInstance.get("/api/allUrls");
-          const list: ShortUrl[] = res.data?.urls ?? [];
-          // show newest first (if backend doesn't provide sorting)
-          setUrls([...list].reverse());
-        } catch (err) {
-          console.error("Error fetching URLs:", err);
-        } finally {
-          setLoadingUrls(false);
-        }
-      };
-    
-      useEffect(() => {
-        getAllUrls();
-      }, []);
-      return {urls,loadingUrls,setUrls}
+interface getAllUrls{
+  urls:ShortUrl[]
 }
+const fetchAllUrls = async () => {
+  const res = await axiosInstance.get<getAllUrls>("/api/allUrls");
+  return res.data.urls
+  
+ 
+};
 
-export default useGetAllUrls
+const useGetAllUrls = () => {
+  
+
+  const { data, isLoading, error } = useQuery<ShortUrl[],Error>({
+    queryKey: ["allUrls"],
+    queryFn: fetchAllUrls,  
+  });
+
+ 
+
+  return {
+    urls: data ?? [],
+    loadingUrls: isLoading,
+    
+    error,
+  };
+};
+
+export default useGetAllUrls;

@@ -29,7 +29,7 @@ const DashBoardPage: React.FC = () => {
   const navigate = useNavigate();
   const { isAuth } = useAuth();
 
-  const { loadingUrls, urls, setUrls } = useGetAllUrls();
+  const { loadingUrls, urls } = useGetAllUrls();
   const { handleShorturl, loading, error, shortUrl } = useCreateShortUrl();
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -37,7 +37,7 @@ const DashBoardPage: React.FC = () => {
     const newDoc = await handleShorturl(url, customName);
 
     if (newDoc) {
-      setUrls((prev) => [newDoc, ...prev]);
+      
       setUrl("");
       setCustomName("");
     }

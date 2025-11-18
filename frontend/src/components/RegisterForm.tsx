@@ -2,7 +2,7 @@ import  { useState, type ChangeEvent,type  FormEvent } from "react";
 import { Link } from "react-router";
 import useRegister from "../hooks/useRegister";
 
-interface FormState {
+export interface FormState {
   name: string;
   email: string;
   password: string;
@@ -91,7 +91,7 @@ export default function RegisterForm() {
             />
           </label>
 
-          {error && <p className="text-sm text-red-500">{error}</p>}
+          {error && <p className="text-sm text-red-500">{error.message}</p>}
 
           <button
             type="submit"

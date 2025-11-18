@@ -1,7 +1,8 @@
-import  { useState } from "react";
+
 import toast from "react-hot-toast";
 import { axiosInstance } from "../helper/axiosInstance";
 import { useNavigate } from "react-router";
+import { useMutation } from "@tanstack/react-query";
 
 
 
@@ -9,39 +10,41 @@ export interface LoginForm {
   email: string;
   password: string;
 }
+const login=async({email,password}:LoginForm)=>{
+       if (!email.trim() || !password.trim()) {
+         return;
+       }
+        return await axiosInstance.post("/api/auth/login", {
+          email,
+          password,
+        });
+       
+}
 const useLogin=()=>{
-     const navigate = useNavigate();
-    const [loading, setLoading] = useState(false);
-      const [error, setError] = useState<string | null>(null);
-      async function handleLogin(email:string,password:string){
-             setError(null);
-            
-             if (!email.trim() || !password.trim()) {
-               setError("Please enter both email and password.");
-               return;
-             }
-
-             setLoading(true);
-             try {
-               const res = await axiosInstance.post("/api/auth/login", {
-                 email,
-                 password,
-               });
-               if (res?.data) {
+    const navigate = useNavigate();
+   
+      const userLogin=useMutation({
+        mutationFn:login,
+        onSuccess:()=>{
+             
                  toast.success("Logged in successfully");
                  navigate("/DashBoard");
-               } else {
-                 throw new Error("Invalid response from server");
-               }
-             } catch (err: any) {
-               const msg =
-                 err?.response?.data?.message || err?.message || "Login failed";
-               setError(msg);
-               toast.error(msg);
-             } finally {
-               setLoading(false);
-             }
+               
+
+        },
+        onError:(err:Error)=>{
+          console.log(err);
+        }
+      })
+
+     async function handleLogin (email:string,password:string){
+          return await userLogin.mutateAsync({email,password})
       }
-      return {handleLogin,error,loading}
+     
+      return {
+        handleLogin,
+        loading:userLogin.isPending,
+        error:userLogin.error
+      }
 }
 export default useLogin;

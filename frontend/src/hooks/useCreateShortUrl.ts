@@ -1,33 +1,46 @@
-import { useState } from "react";
+
+import { QueryClient, useMutation, useQueryClient } from "@tanstack/react-query";
 import { axiosInstance } from "../helper/axiosInstance";
 import type { FetchResponse } from "../Pages/DashBoardPage";
 
 
-const useCreateShortUrl=()=>{
+const createUrl=async ({url,customName}: {url: string,customName?: string}) => {
+      const res = await axiosInstance.post<FetchResponse>("/api/create", {
+        url,
+        slug: customName,
+      });
 
-     const [shortUrl, setShortUrl] = useState<string | null>(null);
-     const [loading, setLoading] = useState(false);
-     const [error, setError] = useState<string | null>(null);
-     async function handleShorturl(url:string,customName?:string){
-         setLoading(true);
-         setError(null);
-         setShortUrl(null);
+      if (!res.data) throw new Error("Failed to shorten URL");
 
-         try {
-           const res = await axiosInstance.post<FetchResponse>("/api/create", { url ,slug:customName});
+      return res.data.newdoc;
+    }
+   
 
-           if (!res.data) throw new Error("Failed to shorten URL");
+const useCreateShortUrl = () => {
+ const queryClient=useQueryClient()
+  const mutation = useMutation({
+    mutationFn: createUrl,
+    onSuccess: (data) => {
+     console.log("inside create wala ",data)
+     queryClient.invalidateQueries({ queryKey: ['allUrls'] })
+    },
+    onError:(err:Error)=>{
+      console.log("failed while creating shortUrl ",err.message);
+    }
+  });
+  
+  const handleShorturl = async (url: string, customName?: string) => {
+   
+    const result = await mutation.mutateAsync({ url, customName });
+    return result;
+  };
 
-           const { data } = res;
-           setShortUrl(data.newdoc.shortUrl);
-           return data.newdoc
-         } catch (err: any) {
-           setError(err.message || "Something went wrong");
-         } finally {
-           setLoading(false);
-         }
-     }
-     return {handleShorturl,loading,error,shortUrl}
-    
-}
-export default useCreateShortUrl
+  return {
+    handleShorturl,
+    loading: mutation.isPending,
+    error: mutation.error?.message || null,
+    shortUrl:mutation.data?.shortUrl,
+  };
+};
+
+export default useCreateShortUrl;
