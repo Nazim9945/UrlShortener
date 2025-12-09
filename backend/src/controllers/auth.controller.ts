@@ -3,6 +3,7 @@ import jwt from 'jsonwebtoken'
 import dotenv from 'dotenv'
 import { AppError } from "../middlewares/errorHandler";
 import UserSchema from "../models/user.model";
+import { CookieOptions } from "express";
 dotenv.config()
 const registerUser=TryCatch(async(req,res)=>{
     const {name,email,password}=req.body;
@@ -52,11 +53,12 @@ const loginUser=TryCatch(async(req,res)=>{
       const token = jwt.sign(payload, process.env.SECRET as string, {
         expiresIn: "1d",
       });
-      const options={
-        maxAge:24 * 60 * 60 * 1000,
-        httpOnly:true,
-        
-      }
+      const options= {
+        maxAge: 24 * 60 * 60 * 1000,
+        httpOnly: true,
+        sameSite: "lax",
+        secure: process.env.NODE_ENV == "production",
+      } as CookieOptions
       res.cookie("accessToken",token,options)
       
     res.status(200).json({ token,message: "User logged in successfully" });
