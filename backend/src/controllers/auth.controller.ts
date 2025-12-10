@@ -30,7 +30,9 @@ const registerUser=TryCatch(async(req,res)=>{
      const options = {
        maxAge: 24 * 60 * 60 * 1000,
        httpOnly: true,
-     };
+       sameSite: "lax",
+       secure: process.env.NODE_ENV == "production",
+     } as CookieOptions
      res.cookie("accessToken", token, options);
     res.status(201).json({ token,message: "User registered successfully" });
 });
